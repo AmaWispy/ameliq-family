@@ -46,12 +46,12 @@ export default function Index({ items, categories }) {
                                 items.map((row) => (
                                     <div
                                         key={row.id}
-                                        className="flex flex-col gap-2 rounded border p-3 sm:flex-row sm:items-center sm:justify-between"
+                                        className="flex flex-col gap-3 rounded border p-3 sm:flex-row sm:items-center sm:justify-between"
                                     >
-                                        <div>
-                                            <p className="font-medium">{row.name}</p>
-                                            <p className="text-sm text-gray-600">
-                                                {row.category_name} · {row.amount.toFixed(2)} · {row.charge_day} число
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium text-gray-900">{row.name}</p>
+                                            <p className="mt-1 text-sm text-gray-600">
+                                                {row.category_name} · {row.charge_day} число месяца
                                                 {row.note ? ` · ${row.note}` : ''}
                                             </p>
                                             <p className="mt-1 text-xs text-gray-500">
@@ -63,20 +63,28 @@ export default function Index({ items, categories }) {
                                                 {row.last_applied_month ? ` · последний учёт: ${row.last_applied_month}` : ''}
                                             </p>
                                         </div>
-                                        <div className="flex shrink-0 gap-2">
-                                            <Link
-                                                href={route('auto-expenses.edit', row.id)}
-                                                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                                        <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                                            <p
+                                                className="text-2xl font-semibold tabular-nums tracking-tight text-gray-900 sm:text-3xl"
+                                                title="Сумма списания"
                                             >
-                                                Изменить
-                                            </Link>
-                                            <button
-                                                type="button"
-                                                className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50"
-                                                onClick={() => destroy(row.id)}
-                                            >
-                                                Удалить
-                                            </button>
+                                                {row.amount.toFixed(2)}
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <Link
+                                                    href={route('auto-expenses.edit', row.id)}
+                                                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    Изменить
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50"
+                                                    onClick={() => destroy(row.id)}
+                                                >
+                                                    Удалить
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))

@@ -6,6 +6,7 @@ import {
     BarChart,
     Cell,
     CartesianGrid,
+    LabelList,
     Legend,
     Line,
     LineChart,
@@ -19,8 +20,8 @@ const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 const CARTESIAN_MARGIN = { top: 8, right: 8, left: 8, bottom: 8 };
 
-/** Поля слева под длинные названия категорий в горизонтальной гистограмме. */
-const CATEGORY_BAR_MARGIN = { top: 8, right: 16, left: 8, bottom: 8 };
+/** Поля гистограммы категорий: справа запас под подписи сумм на полосах. */
+const CATEGORY_BAR_MARGIN = { top: 8, right: 64, left: 8, bottom: 8 };
 
 export default function Dashboard({
     stats,
@@ -261,6 +262,19 @@ export default function Dashboard({
                                         labelFormatter={(label) => label}
                                     />
                                     <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                                        <LabelList
+                                            dataKey="value"
+                                            position="right"
+                                            offset={8}
+                                            formatter={(v) =>
+                                                typeof v === 'number' ? v.toFixed(2) : Number(v).toFixed(2)
+                                            }
+                                            style={{
+                                                fill: '#111827',
+                                                fontSize: 12,
+                                                fontWeight: 600,
+                                            }}
+                                        />
                                         {expenseByCategorySorted.map((entry) => (
                                             <Cell key={entry.name} fill={entry.color ?? '#9CA3AF'} />
                                         ))}

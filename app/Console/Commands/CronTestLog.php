@@ -13,6 +13,10 @@ class CronTestLog extends Command
 
     public function handle(): int
     {
+        if (! config('app.cron_test_log')) {
+            return self::SUCCESS;
+        }
+
         $now = now();
 
         Log::info('[cron:test] Сработало', [
