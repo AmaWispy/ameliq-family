@@ -8,11 +8,11 @@ import { Head, Link, useForm } from '@inertiajs/react';
 
 const today = new Date().toISOString().split('T')[0];
 
-export default function Create() {
+export default function Create({ defaultDueDate }) {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         description: '',
-        due_date: today,
+        due_date: defaultDueDate ?? today,
         due_time: '',
         is_completed: false,
     });

@@ -44,6 +44,10 @@ export default function Index({ tasks, filters }) {
             ...(filterData.date ? { date: filterData.date } : {}),
         });
 
+    const createHref = filterData.date
+        ? route('tasks.create', { date: filterData.date })
+        : route('tasks.create');
+
     return (
         <AuthenticatedLayout
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Задачи по дням</h2>}
@@ -54,7 +58,7 @@ export default function Index({ tasks, filters }) {
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
                     <div className="rounded-lg bg-white p-6 shadow-sm">
                         <div className="mb-4">
-                            <Link href={route('tasks.create')}>
+                            <Link href={createHref}>
                                 <PrimaryButton>Добавить задачу</PrimaryButton>
                             </Link>
                         </div>

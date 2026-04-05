@@ -14,8 +14,7 @@ class AutoExpenseController extends Controller
     public function index(Request $request): Response
     {
         $items = AutoExpense::query()
-            ->with('category')
-            ->where('user_id', $request->user()->id)
+            ->with(['category', 'user'])
             ->orderBy('charge_day')
             ->orderBy('name')
             ->get()
@@ -29,6 +28,7 @@ class AutoExpenseController extends Controller
                 'expense_category_id' => $row->expense_category_id,
                 'category_name' => $row->category?->name,
                 'last_applied_month' => $row->last_applied_month,
+                'owner_name' => $row->user?->name,
             ]);
 
         $categories = ExpenseCategory::query()

@@ -36,11 +36,4 @@ class AutoExpense extends Model
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
     }
-
-    public function resolveRouteBinding($value, $field = null)
-    {
-        return $this->where($field ?? $this->getRouteKeyName(), $value)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-    }
 }

@@ -9,6 +9,10 @@ export default function Index({ items, categories }) {
         }
     };
 
+    const totalActivePerMonth = items
+        .filter((row) => row.is_active)
+        .reduce((sum, row) => sum + Number(row.amount), 0);
+
     return (
         <AuthenticatedLayout
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Авторасходы</h2>}
@@ -19,7 +23,17 @@ export default function Index({ items, categories }) {
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
                     <div className="rounded-lg bg-white p-6 shadow-sm">
                         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                            <h3 className="text-lg font-medium">Правила</h3>
+                            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                                <h3 className="text-lg font-medium">Правила</h3>
+                                {items.length > 0 && (
+                                    <p className="text-sm text-gray-600">
+                                        Итого по активным (в месяц):{' '}
+                                        <span className="font-semibold tabular-nums text-gray-900">
+                                            {totalActivePerMonth.toFixed(2)}
+                                        </span>
+                                    </p>
+                                )}
+                            </div>
                             {categories.length > 0 ? (
                                 <Link href={route('auto-expenses.create')}>
                                     <PrimaryButton>Добавить авторасход</PrimaryButton>
@@ -68,7 +82,7 @@ export default function Index({ items, categories }) {
                                                 className="text-2xl font-semibold tabular-nums tracking-tight text-gray-900 sm:text-3xl"
                                                 title="Сумма списания"
                                             >
-                                                {row.amount.toFixed(2)}
+                                                {Number(row.amount).toFixed(2)}
                                             </p>
                                             <div className="flex gap-2">
                                                 <Link

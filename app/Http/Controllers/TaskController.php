@@ -4,14 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TaskController extends Controller
 {
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('Tasks/Create');
+        $defaultDueDate = null;
+        $date = $request->query('date');
+        if (is_string($date) && $date !== '') {
+            $validator = Validator::make(
+                ['date' => $date],
+                ['date' => ['date']],
+            );
+            if ($validator->passes()) {
+                $defaultDueDate = $date;
+            }
+        }
+
+        return Inertia::render('Tasks/Create', [
+            'defaultDueDate' => $defaultDueDate,
+        ]);
     }
 
     public function edit(Request $request, Task $task): Response
