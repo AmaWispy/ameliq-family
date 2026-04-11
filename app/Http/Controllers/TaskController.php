@@ -62,24 +62,35 @@ class TaskController extends Controller
      */
     public function index(Request $request): Response
     {
-        $dateQuery = $request->query('date');
+        $startDateQuery = $request->query('date');
+        $endDateQuery = $request->query('end_date');
 
-        if ($dateQuery === null) {
-            $dateFilter = now()->toDateString();
-        } elseif ($dateQuery === '') {
-            $dateFilter = null;
+        if ($startDateQuery === null) {
+            $startDate = now()->toDateString();
+        } elseif ($startDateQuery === '') {
+            $startDate = null;
         } else {
-            $dateFilter = $dateQuery;
+            $startDate = $startDateQuery;
+        }
+
+        if ($endDateQuery === null && $startDate !== null) {
+            $endDate = now()->parse($startDate)->addDays(6)->toDateString();
+        } else {
+            $endDate = $endDateQuery ?: null;
         }
 
         $tasksQuery = Task::query()
-            ->orderByDesc('due_date')
+            ->orderBy('due_date')
             ->orderByRaw('CASE WHEN due_time IS NULL THEN 1 ELSE 0 END')
             ->orderBy('due_time')
-            ->orderByDesc('id');
+            ->orderBy('id');
 
-        if ($dateFilter !== null) {
-            $tasksQuery->whereDate('due_date', $dateFilter);
+        if ($startDate !== null) {
+            $tasksQuery->whereDate('due_date', '>=', $startDate);
+        }
+
+        if ($endDate !== null) {
+            $tasksQuery->whereDate('due_date', '<=', $endDate);
         }
 
         $tasks = $tasksQuery->get()
@@ -97,7 +108,8 @@ class TaskController extends Controller
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks,
             'filters' => [
-                'date' => $dateFilter ?? '',
+                'date' => $startDate ?? '',
+                'end_date' => $endDate ?? '',
             ],
         ]);
     }
