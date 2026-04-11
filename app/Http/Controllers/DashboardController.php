@@ -41,13 +41,10 @@ class DashboardController extends Controller
             ];
         }
 
-        $from = $periodStart->copy()->subMonths(5);
-        $to = $periodEnd->copy();
-
         $expensesByCategory = Expense::query()
             ->with('category')
-            ->whereDate('spent_on', '>=', $from->toDateString())
-            ->whereDate('spent_on', '<', $to->toDateString())
+            ->whereDate('spent_on', '>=', $periodStart->toDateString())
+            ->whereDate('spent_on', '<', $periodEnd->toDateString())
             ->get()
             ->groupBy(fn (Expense $expense) => $expense->category?->name ?? 'Без категории')
             ->map(function ($items, string $name) {

@@ -230,7 +230,7 @@ export default function Dashboard({
 
                     <div className="rounded-lg bg-white p-4 shadow-sm">
                         <h3 className="mb-4 text-lg font-medium text-gray-800">
-                            Расходы по категориям (последние 6 периодов 10-10)
+                            Расходы по категориям за период {stats.period_start} — {stats.period_end}
                         </h3>
                         <div
                             className="w-full min-h-[18rem]"
