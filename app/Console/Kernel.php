@@ -13,6 +13,10 @@ class Kernel extends ConsoleKernel
             ->dailyAt('6:00')
             ->timezone(config('app.timezone'));
 
+        $schedule->command('tasks:send-daily')
+            ->dailyAt('08:00')
+            ->timezone(config('app.timezone'));
+
         //$schedule->command('cron:test')->everyFiveSeconds();
     }
 
