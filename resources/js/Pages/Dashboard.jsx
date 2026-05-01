@@ -202,18 +202,31 @@ export default function Dashboard({
                                         } hover:border-indigo-300 hover:bg-indigo-50/60 ${cell.isToday ? 'ring-1 ring-indigo-500' : ''}`}
                                         aria-label={`Задачи на ${cell.dateKey}`}
                                     >
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className="text-sm font-semibold text-gray-800">{cell.day}</span>
-                                            {cell.tasks ? (
-                                                <span
-                                                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                                                        cell.tasks.open > 0
-                                                            ? 'bg-amber-100 text-amber-700'
-                                                            : 'bg-emerald-100 text-emerald-700'
-                                                    }`}
-                                                >
-                                                    {cell.tasks.total}
-                                                </span>
+                                        <div className="flex h-full flex-col justify-between">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="text-sm font-semibold text-gray-800">{cell.day}</span>
+                                                {cell.tasks ? (
+                                                    <span
+                                                        className={`rounded-full p-[0.4rem] text-xs font-semibold leading-none ${
+                                                            cell.tasks.open > 0
+                                                                ? 'bg-amber-100 text-amber-700'
+                                                                : 'bg-emerald-100 text-emerald-700'
+                                                        }`}
+                                                        title="Невыполненные задачи"
+                                                    >
+                                                        {cell.tasks.open}
+                                                    </span>
+                                                ) : null}
+                                            </div>
+                                            {cell.tasks && cell.tasks.total - cell.tasks.open > 0 ? (
+                                                <div className="mt-1 flex justify-end">
+                                                    <span
+                                                        className="rounded-full bg-emerald-100 p-[0.4rem] text-xs font-semibold leading-none text-emerald-700"
+                                                        title="Выполнено"
+                                                    >
+                                                        {cell.tasks.total - cell.tasks.open}
+                                                    </span>
+                                                </div>
                                             ) : null}
                                         </div>
                                     </Link>
@@ -223,8 +236,8 @@ export default function Dashboard({
                             )}
                         </div>
                         <p className="mt-3 text-xs text-gray-500">
-                            Нажмите на день, чтобы открыть список задач с фильтром по этой дате. Число в кружке — количество
-                            задач на день.
+                            Нажмите на день, чтобы открыть список задач с фильтром по этой дате. Первая цифра — невыполненные задачи,
+                            вторая — выполнено.
                         </p>
                     </div>
 
