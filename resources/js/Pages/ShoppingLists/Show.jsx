@@ -21,7 +21,7 @@ function NewItemForm({ listId }) {
         <form onSubmit={submit} className="mt-3 grid gap-2 md:grid-cols-4">
             <div className="md:col-span-2">
                 <TextInput
-                    placeholder="Название продукта"
+                    placeholder="Название элемента"
                     className="w-full"
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
@@ -40,7 +40,7 @@ function NewItemForm({ listId }) {
                 <InputError className="mt-1" message={errors.quantity} />
             </div>
             <div>
-                <PrimaryButton disabled={processing}>Добавить продукт</PrimaryButton>
+                <PrimaryButton disabled={processing}>Добавить элемент</PrimaryButton>
             </div>
         </form>
     );
@@ -113,7 +113,7 @@ export default function Show({ shoppingList }) {
                                             title="Удалить"
                                             className="rounded-md border border-red-300 p-2 text-sm text-red-700"
                                             onClick={() => {
-                                                if (!window.confirm('Удалить продукт из списка?')) return;
+                                                if (!window.confirm('Удалить элемент из списка?')) return;
                                                 router.delete(route('shopping-items.destroy', item.id));
                                             }}
                                         >
@@ -128,7 +128,7 @@ export default function Show({ shoppingList }) {
                                 </div>
                             ))}
                             {shoppingList.items.length === 0 && (
-                                <p className="text-sm text-gray-600">В этом списке пока нет продуктов.</p>
+                                <p className="text-sm text-gray-600">В этом списке пока нет элементов.</p>
                             )}
                         </div>
                     </div>

@@ -17,9 +17,9 @@ export default function Create() {
 
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Новый список покупок</h2>}
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Новый список</h2>}
         >
-            <Head title="Новый список покупок" />
+            <Head title="Новый список" />
 
             <div className="py-8">
                 <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">

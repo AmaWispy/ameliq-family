@@ -20,7 +20,7 @@ export default function Edit({ shoppingList, return_to: returnTo }) {
         <AuthenticatedLayout
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Редактировать список</h2>}
         >
-            <Head title="Редактировать список покупок" />
+            <Head title="Редактировать список" />
 
             <div className="py-8">
                 <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">

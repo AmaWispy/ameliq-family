@@ -5,22 +5,22 @@ import { Head, Link, router } from '@inertiajs/react';
 export default function Index({ shoppingLists }) {
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Списки покупок</h2>}
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Списки</h2>}
         >
-            <Head title="Списки покупок" />
+            <Head title="Списки" />
 
             <div className="py-8">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
                     <div className="rounded-lg bg-white p-6 shadow-sm">
                         <h3 className="mb-3 text-lg font-medium">Действия</h3>
                         <Link href={route('shopping-lists.create')}>
-                            <PrimaryButton>Создать список покупок</PrimaryButton>
+                            <PrimaryButton>Создать список</PrimaryButton>
                         </Link>
                     </div>
 
                     {shoppingLists.length === 0 && (
                         <div className="rounded-lg bg-white p-6 text-gray-600 shadow-sm">
-                            Пока нет списков покупок.
+                            Пока нет списков.
                         </div>
                     )}
 
@@ -32,7 +32,7 @@ export default function Index({ shoppingLists }) {
                                 </Link>
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm text-gray-600">
-                                        Продуктов: {list.items_count}
+                                        Элементов: {list.items_count}
                                     </span>
                                     <Link
                                         href={route('shopping-lists.edit', list.id)}
@@ -50,7 +50,7 @@ export default function Index({ shoppingLists }) {
                                         title="Удалить"
                                         className="rounded-md border border-red-300 p-2 text-sm text-red-700"
                                         onClick={() => {
-                                            if (!window.confirm('Удалить список покупок?')) return;
+                                            if (!window.confirm('Удалить список?')) return;
                                             router.delete(route('shopping-lists.destroy', list.id));
                                         }}
                                     >

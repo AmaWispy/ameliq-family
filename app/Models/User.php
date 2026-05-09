@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ShoppingList::class);
     }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class);
+    }
 }

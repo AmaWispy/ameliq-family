@@ -4,14 +4,26 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { 
+    IconListCheck, 
+    IconNotes, 
+    IconCash, 
+    IconCashPlus,
+    IconWallet, 
+    IconClipboardList,
+    IconLayoutDashboard,
+    IconTags,
+    IconBolt,
+    IconCashMinus
+} from '@tabler/icons-react';
 
 function MobileNavLink({ href, active, title, children }) {
     return (
         <Link
             href={href}
             title={title}
-            className={`flex min-h-[44px] flex-1 basis-0 items-center justify-center rounded-md px-0.5 py-2 text-base font-bold leading-tight tracking-tight text-black ${
-                active ? 'bg-gray-200' : 'bg-transparent hover:bg-gray-100'
+            className={`flex min-h-[44px] flex-1 basis-0 items-center justify-center rounded-md px-0.5 py-2 text-base font-bold leading-tight tracking-tight ${
+                active ? 'bg-indigo-50 text-indigo-600' : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-700'
             }`}
         >
             {children}
@@ -54,7 +66,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     href={route('expense-categories.index')}
                                     active={route().current('expense-categories.*')}
                                 >
-                                    Категории расходов
+                                    Категории
                                 </NavLink>
                                 <NavLink
                                     href={route('expenses.index')}
@@ -69,10 +81,16 @@ export default function AuthenticatedLayout({ header, children }) {
                                     Доходы
                                 </NavLink>
                                 <NavLink
+                                    href={route('notes.index')}
+                                    active={route().current('notes.*')}
+                                >
+                                    Заметки
+                                </NavLink>
+                                <NavLink
                                     href={route('shopping-lists.index')}
                                     active={route().current('shopping-lists.*')}
                                 >
-                                    Списки покупок
+                                    Списки
                                 </NavLink>
                                 <NavLink
                                     href={route('auto-expenses.index')}
@@ -88,35 +106,35 @@ export default function AuthenticatedLayout({ header, children }) {
                                     active={route().current('tasks.*')}
                                     title="Задачи"
                                 >
-                                    З
-                                </MobileNavLink>
-                                <MobileNavLink
-                                    href={route('expense-categories.index')}
-                                    active={route().current('expense-categories.*')}
-                                    title="Категории расходов"
-                                >
-                                    КР
+                                    <IconListCheck size={24} stroke={2} />
                                 </MobileNavLink>
                                 <MobileNavLink
                                     href={route('expenses.index')}
                                     active={route().current('expenses.*')}
                                     title="Расходы"
                                 >
-                                    Р
+                                    <IconCashMinus size={24} stroke={2} />
                                 </MobileNavLink>
                                 <MobileNavLink
                                     href={route('incomes.index')}
                                     active={route().current('incomes.*')}
                                     title="Доходы"
                                 >
-                                    Д
+                                    <IconCashPlus size={24} stroke={2} />
+                                </MobileNavLink>
+                                <MobileNavLink
+                                    href={route('notes.index')}
+                                    active={route().current('notes.*')}
+                                    title="Заметки"
+                                >
+                                    <IconNotes size={24} stroke={2} />
                                 </MobileNavLink>
                                 <MobileNavLink
                                     href={route('shopping-lists.index')}
                                     active={route().current('shopping-lists.*')}
-                                    title="Списки покупок"
+                                    title="Списки"
                                 >
-                                    СП
+                                    <IconClipboardList size={24} stroke={2} />
                                 </MobileNavLink>
                             </div>
                         </div>
@@ -227,10 +245,22 @@ export default function AuthenticatedLayout({ header, children }) {
 
                         <div className="mt-3 space-y-1">
                             <ResponsiveNavLink
+                                href={route('expense-categories.index')}
+                                active={route().current('expense-categories.*')}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <IconTags size={18} />
+                                    Категории расходов
+                                </div>
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
                                 href={route('auto-expenses.index')}
                                 active={route().current('auto-expenses.*')}
                             >
-                                Авторасходы
+                                <div className="flex items-center gap-2">
+                                    <IconBolt size={18} />
+                                    Авторасходы
+                                </div>
                             </ResponsiveNavLink>
                             <ResponsiveNavLink href={route('profile.edit')}>
                                 Профиль

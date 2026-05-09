@@ -6,6 +6,8 @@ use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\ShoppingItemController;
 use App\Http\Controllers\ShoppingListController;
 use App\Http\Controllers\TaskController;
@@ -32,6 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/shopping-lists/{shoppingList}/items', [ShoppingItemController::class, 'store'])->name('shopping-items.store');
     Route::put('/shopping-items/{shoppingItem}', [ShoppingItemController::class, 'update'])->name('shopping-items.update');
     Route::delete('/shopping-items/{shoppingItem}', [ShoppingItemController::class, 'destroy'])->name('shopping-items.destroy');
+
+    Route::resource('notes', NoteController::class);
+    Route::post('/security/request-pin', [SecurityController::class, 'requestPin'])->name('security.request-pin');
+    Route::post('/security/verify-pin', [SecurityController::class, 'verifyPin'])->name('security.verify-pin');
 });
 
 require __DIR__.'/auth.php';
