@@ -1,6 +1,5 @@
 const CACHE_NAME = 'ameliq-family-v1';
 const ASSETS_TO_CACHE = [
-    '/',
     '/logo.png',
     '/site.webmanifest'
 ];
@@ -19,9 +18,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Стратегия Network First (сначала сеть, потом кэш)
+    // Это критично для Inertia.js и CSRF токенов
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
+        fetch(event.request)
+            .catch(() => {
+                return caches.match(event.request);
+            })
     );
 });
