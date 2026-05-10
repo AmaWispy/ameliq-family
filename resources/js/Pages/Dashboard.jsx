@@ -132,12 +132,21 @@ export default function Dashboard({
 
             <div className="py-12">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
-                    <div className="rounded-lg bg-white p-6 shadow-sm">
-                        <p className="text-sm text-gray-500">Баланс за период</p>
-                        <p className="mt-1 text-3xl font-semibold text-indigo-700 tabular-nums">{balance.toFixed(2)}</p>
-                        <p className="mt-2 text-xs text-gray-500">
-                            {stats.period_start} — {stats.period_end}
-                        </p>
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <div className="rounded-lg bg-white p-6 shadow-sm">
+                            <p className="text-sm text-gray-500">Баланс за период</p>
+                            <p className="mt-1 text-3xl font-semibold text-indigo-700 tabular-nums">{balance.toFixed(2)}</p>
+                            <p className="mt-2 text-xs text-gray-500">
+                                {stats.period_start} — {stats.period_end}
+                            </p>
+                        </div>
+                        <div className="rounded-lg bg-white p-6 shadow-sm">
+                            <p className="text-sm text-gray-500">Общий остаток (с учетом переноса)</p>
+                            <p className="mt-1 text-3xl font-semibold text-emerald-700 tabular-nums">{Number(stats.total_balance).toFixed(2)}</p>
+                            <p className="mt-2 text-xs text-gray-500">
+                                Весь период
+                            </p>
+                        </div>
                     </div>
 
                     <div className="rounded-lg bg-white p-4 shadow-sm">
@@ -311,7 +320,8 @@ export default function Dashboard({
                                     <Legend />
                                     <Line type="monotone" dataKey="income" name="Доход" stroke="#16a34a" strokeWidth={2} />
                                     <Line type="monotone" dataKey="expense" name="Расход" stroke="#dc2626" strokeWidth={2} />
-                                    <Line type="monotone" dataKey="balance" name="Баланс" stroke="#4f46e5" strokeWidth={2} />
+                                    <Line type="monotone" dataKey="balance" name="Баланс периода" stroke="#94a3b8" strokeWidth={1} strokeDasharray="5 5" />
+                                    <Line type="monotone" dataKey="cumulative_balance" name="Накопленный баланс" stroke="#4f46e5" strokeWidth={3} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>

@@ -18,6 +18,16 @@ class DashboardController extends Controller
             : $now->copy()->startOfMonth()->setDay(10);
         $periodEnd = $periodStart->copy()->addMonth();
 
+        // Calculate initial balance before the first displayed month (6 months ago)
+        $firstPeriodStart = $periodStart->copy()->subMonths(5);
+        $initialIncome = (float) Income::query()
+            ->whereDate('received_on', '<', $firstPeriodStart->toDateString())
+            ->sum('amount');
+        $initialExpense = (float) Expense::query()
+            ->whereDate('spent_on', '<', $firstPeriodStart->toDateString())
+            ->sum('amount');
+        $currentCumulativeBalance = $initialIncome - $initialExpense;
+
         $months = [];
         for ($offset = 5; $offset >= 0; $offset--) {
             $start = $periodStart->copy()->subMonths($offset);
@@ -33,11 +43,15 @@ class DashboardController extends Controller
                 ->whereDate('spent_on', '<', $end->toDateString())
                 ->sum('amount');
 
+            $periodBalance = $income - $expense;
+            $currentCumulativeBalance += $periodBalance;
+
             $months[] = [
                 'month' => $start->locale('ru')->translatedFormat('d.m').' - '.$end->locale('ru')->translatedFormat('d.m'),
                 'income' => round($income, 2),
                 'expense' => round($expense, 2),
-                'balance' => round($income - $expense, 2),
+                'balance' => round($periodBalance, 2),
+                'cumulative_balance' => round($currentCumulativeBalance, 2),
             ];
         }
 
@@ -67,6 +81,9 @@ class DashboardController extends Controller
                 'open' => $items->where('is_completed', false)->count(),
             ]);
 
+        $totalIncomeAllTime = (float) Income::query()->sum('amount');
+        $totalExpenseAllTime = (float) Expense::query()->sum('amount');
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'total_income' => round((float) Income::query()
@@ -77,6 +94,7 @@ class DashboardController extends Controller
                     ->whereDate('spent_on', '>=', $periodStart->toDateString())
                     ->whereDate('spent_on', '<', $periodEnd->toDateString())
                     ->sum('amount'), 2),
+                'total_balance' => round($totalIncomeAllTime - $totalExpenseAllTime, 2),
                 'open_tasks' => Task::query()->where('is_completed', false)->count(),
                 'period_start' => $periodStart->toDateString(),
                 'period_end' => $periodEnd->toDateString(),
