@@ -6,12 +6,128 @@ import Checkbox from '@/Components/Checkbox';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Create() {
+const TYPE_TITLES = {
+    note: 'Новая заметка',
+    password: 'Новый пароль',
+    address: 'Новый адрес',
+};
+
+function NoteFields({ data, setData, errors }) {
+    return (
+        <div className="mt-4">
+            <InputLabel htmlFor="content" value="Описание *" />
+            <textarea
+                id="content"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                rows="10"
+                value={data.content}
+                onChange={(e) => setData('content', e.target.value)}
+                required
+            />
+            <InputError message={errors.content} className="mt-2" />
+        </div>
+    );
+}
+
+function PasswordFields({ data, setData, errors }) {
+    return (
+        <>
+            <div className="mt-4">
+                <InputLabel htmlFor="url" value="Ссылка" />
+                <TextInput
+                    id="url"
+                    type="text"
+                    className="mt-1 block w-full"
+                    value={data.url}
+                    onChange={(e) => setData('url', e.target.value)}
+                    autoComplete="off"
+                    placeholder="https://"
+                />
+                <InputError message={errors.url} className="mt-2" />
+            </div>
+            <div className="mt-4">
+                <InputLabel htmlFor="login" value="Логин *" />
+                <TextInput
+                    id="login"
+                    className="mt-1 block w-full"
+                    value={data.login}
+                    onChange={(e) => setData('login', e.target.value)}
+                    required
+                    autoComplete="off"
+                />
+                <InputError message={errors.login} className="mt-2" />
+            </div>
+            <div className="mt-4">
+                <InputLabel htmlFor="password" value="Пароль *" />
+                <TextInput
+                    id="password"
+                    type="text"
+                    className="mt-1 block w-full"
+                    value={data.password}
+                    onChange={(e) => setData('password', e.target.value)}
+                    required
+                    autoComplete="off"
+                />
+                <InputError message={errors.password} className="mt-2" />
+            </div>
+        </>
+    );
+}
+
+function AddressFields({ data, setData, errors }) {
+    return (
+        <>
+            <div className="mt-4">
+                <InputLabel htmlFor="url" value="Ссылка" />
+                <TextInput
+                    id="url"
+                    type="text"
+                    className="mt-1 block w-full"
+                    value={data.url}
+                    onChange={(e) => setData('url', e.target.value)}
+                    autoComplete="off"
+                    placeholder="https://"
+                />
+                <InputError message={errors.url} className="mt-2" />
+            </div>
+            <div className="mt-4">
+                <InputLabel htmlFor="address" value="Текстовый адрес" />
+                <textarea
+                    id="address"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    rows="4"
+                    value={data.address}
+                    onChange={(e) => setData('address', e.target.value)}
+                />
+                <InputError message={errors.address} className="mt-2" />
+            </div>
+            <div className="mt-4">
+                <InputLabel htmlFor="coordinates" value="Координаты" />
+                <TextInput
+                    id="coordinates"
+                    className="mt-1 block w-full"
+                    value={data.coordinates}
+                    onChange={(e) => setData('coordinates', e.target.value)}
+                    autoComplete="off"
+                    placeholder="55.751244, 37.618423"
+                />
+                <InputError message={errors.coordinates} className="mt-2" />
+            </div>
+        </>
+    );
+}
+
+export default function Create({ type = 'note' }) {
     const { data, setData, post, processing, errors } = useForm({
+        type,
         title: '',
         content: '',
+        url: '',
+        login: '',
+        password: '',
+        address: '',
+        coordinates: '',
         is_favorite: false,
-        is_password: false,
     });
 
     const submit = (e) => {
@@ -19,18 +135,20 @@ export default function Create() {
         post(route('notes.store'));
     };
 
+    const pageTitle = TYPE_TITLES[type] ?? TYPE_TITLES.note;
+
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Новая заметка</h2>}
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">{pageTitle}</h2>}
         >
-            <Head title="Новая заметка" />
+            <Head title={pageTitle} />
 
             <div className="py-8">
                 <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <form onSubmit={submit} className="p-6">
                             <div>
-                                <InputLabel htmlFor="title" value="Название" />
+                                <InputLabel htmlFor="title" value="Название *" />
                                 <TextInput
                                     id="title"
                                     className="mt-1 block w-full"
@@ -43,20 +161,11 @@ export default function Create() {
                                 <InputError message={errors.title} className="mt-2" />
                             </div>
 
-                            <div className="mt-4">
-                                <InputLabel htmlFor="content" value="Текст заметки" />
-                                <textarea
-                                    id="content"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    rows="10"
-                                    value={data.content}
-                                    onChange={(e) => setData('content', e.target.value)}
-                                    required
-                                ></textarea>
-                                <InputError message={errors.content} className="mt-2" />
-                            </div>
+                            {type === 'note' && <NoteFields data={data} setData={setData} errors={errors} />}
+                            {type === 'password' && <PasswordFields data={data} setData={setData} errors={errors} />}
+                            {type === 'address' && <AddressFields data={data} setData={setData} errors={errors} />}
 
-                            <div className="mt-4 flex flex-wrap gap-6">
+                            <div className="mt-4">
                                 <label className="flex items-center">
                                     <Checkbox
                                         name="is_favorite"
@@ -65,20 +174,11 @@ export default function Create() {
                                     />
                                     <span className="ms-2 text-sm text-gray-600">В избранное</span>
                                 </label>
-
-                                <label className="flex items-center">
-                                    <Checkbox
-                                        name="is_password"
-                                        checked={data.is_password}
-                                        onChange={(e) => setData('is_password', e.target.checked)}
-                                    />
-                                    <span className="ms-2 text-sm text-gray-600">Это пароль (зашифровать)</span>
-                                </label>
                             </div>
 
                             <div className="mt-6 flex items-center justify-end">
                                 <Link
-                                    href={route('notes.index')}
+                                    href={route('notes.index', { type })}
                                     className="text-sm text-gray-600 underline hover:text-gray-900"
                                 >
                                     Отмена

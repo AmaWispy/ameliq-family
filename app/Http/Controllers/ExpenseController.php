@@ -55,17 +55,22 @@ class ExpenseController extends Controller
         $endDate = $request->string('end_date')->toString();
         $categoryId = $request->integer('category_id');
 
-        // Default period: from the 10th to the 10th next month.
-        if ($startDate === '' && $endDate === '') {
-            $today = Carbon::today();
-            $periodStart = $today->day < 10
-                ? $today->copy()->subMonth()->startOfMonth()->setDay(10)
-                : $today->copy()->startOfMonth()->setDay(10);
-            $periodEnd = $periodStart->copy()->addMonth();
+        $today = Carbon::today();
+        $defaultStart = $today->day < 10
+            ? $today->copy()->subMonth()->startOfMonth()->setDay(10)
+            : $today->copy()->startOfMonth()->setDay(10);
+        $defaultEnd = $defaultStart->copy()->addMonth();
 
-            $startDate = $periodStart->toDateString();
-            $endDate = $periodEnd->toDateString();
+        $hadExplicitDates = $startDate !== '' || $endDate !== '';
+
+        // Default period: from the 10th to the 10th next month.
+        if (! $hadExplicitDates) {
+            $startDate = $defaultStart->toDateString();
+            $endDate = $defaultEnd->toDateString();
         }
+
+        $isNotCurrentPeriod = $startDate !== $defaultStart->toDateString()
+            || $endDate !== $defaultEnd->toDateString();
 
         $query = Expense::query()
             ->with('category')
@@ -84,7 +89,26 @@ class ExpenseController extends Controller
             $query->where('expense_category_id', $categoryId);
         }
 
-        $expenses = $query->get()->map(fn (Expense $expense) => [
+        $expenses = $query->get();
+
+        $expenseByCategory = [];
+        if ($categoryId <= 0 && $isNotCurrentPeriod) {
+            $expenseByCategory = $expenses
+                ->groupBy(fn (Expense $expense) => $expense->category?->name ?? 'Без категории')
+                ->map(function ($items, string $name) {
+                    $firstExpense = $items->first();
+
+                    return [
+                        'name' => $name,
+                        'value' => round((float) $items->sum('amount'), 2),
+                        'color' => $firstExpense?->category?->color ?? '#9CA3AF',
+                    ];
+                })
+                ->sortByDesc('value')
+                ->values();
+        }
+
+        $expensesList = $expenses->map(fn (Expense $expense) => [
             'id' => $expense->id,
             'spent_on' => $expense->spent_on->format('Y-m-d'),
             'amount' => (float) $expense->amount,
@@ -98,12 +122,14 @@ class ExpenseController extends Controller
             ->get(['id', 'name']);
 
         return Inertia::render('Expenses/Index', [
-            'expenses' => $expenses,
+            'expenses' => $expensesList,
             'categories' => $categories,
+            'expense_by_category' => $expenseByCategory,
             'filters' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'category_id' => $categoryId > 0 ? $categoryId : '',
+                'show_category_chart' => $categoryId <= 0 && $isNotCurrentPeriod,
             ],
         ]);
     }

@@ -230,10 +230,17 @@ export default function Index({ tasks, filters }) {
                                         dayTasks.map((task) => (
                                             <div
                                                 key={task.id}
-                                                className="flex items-start justify-between gap-3 rounded border p-3"
+                                                className={`flex items-start justify-between gap-3 rounded border p-3 ${
+                                                    task.is_heavy ? 'border-orange-300 bg-orange-50/60' : ''
+                                                }`}
                                             >
                                                 <div className="min-w-0 flex-1">
                                                     <p className="font-medium">
+                                                        {task.is_heavy ? (
+                                                            <span className="mr-1.5 inline-flex items-center rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-700">
+                                                                Тяжёлая
+                                                            </span>
+                                                        ) : null}
                                                         {task.title}
                                                         {task.due_time ? (
                                                             <span className="ml-2 font-mono text-sm font-normal tabular-nums text-gray-600">

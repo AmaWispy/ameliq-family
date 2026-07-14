@@ -15,6 +15,7 @@ export default function Create({ defaultDueDate }) {
         due_date: defaultDueDate ?? today,
         due_time: '',
         is_completed: false,
+        is_heavy: false,
     });
 
     const submit = (e) => {
@@ -86,7 +87,16 @@ export default function Create({ defaultDueDate }) {
                                 />
                                 Выполнено
                             </label>
-                            <div className="flex items-center gap-2">
+                            <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_heavy}
+                                    onChange={(e) => setData('is_heavy', e.target.checked)}
+                                />
+                                Тяжёлая задача
+                                <span className="text-xs text-gray-500">(день выделится в календаре)</span>
+                            </label>
+                            <div className="flex items-center gap-2 md:col-span-2">
                                 <PrimaryButton disabled={processing}>Создать</PrimaryButton>
                                 <Link href={route('tasks.index')} className="rounded-md border px-3 py-2 text-sm">
                                     Назад

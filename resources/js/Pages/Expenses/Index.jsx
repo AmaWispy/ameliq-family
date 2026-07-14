@@ -3,8 +3,22 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useMemo } from 'react';
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    LabelList,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
 
-export default function Index({ expenses, categories, filters }) {
+const CATEGORY_BAR_MARGIN = { top: 8, right: 64, left: 8, bottom: 8 };
+
+export default function Index({ expenses, categories, filters, expense_by_category: expenseByCategory = [] }) {
     const { data: filterData, setData: setFilterData, get } = useForm({
         start_date: filters.start_date ?? '',
         end_date: filters.end_date ?? '',
@@ -21,6 +35,15 @@ export default function Index({ expenses, categories, filters }) {
     };
 
     const total = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+    const showCategoryChart =
+        Boolean(filters.show_category_chart) && expenseByCategory.length > 0;
+
+    const expenseByCategorySorted = useMemo(
+        () => [...expenseByCategory].sort((a, b) => Number(b.value) - Number(a.value)),
+        [expenseByCategory],
+    );
+
+    const periodLabel = [filters.start_date, filters.end_date].filter(Boolean).join(' — ');
 
     return (
         <AuthenticatedLayout
@@ -101,6 +124,61 @@ export default function Index({ expenses, categories, filters }) {
                             </div>
                         </form>
                     </div>
+
+                    {showCategoryChart && (
+                        <div className="rounded-lg bg-white p-4 shadow-sm">
+                            <h3 className="mb-4 text-lg font-medium text-gray-800">
+                                Расходы по категориям{periodLabel ? ` за период ${periodLabel}` : ''}
+                            </h3>
+                            <div
+                                className="w-full min-h-[18rem]"
+                                style={{ height: Math.max(288, expenseByCategorySorted.length * 40 || 288) }}
+                            >
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart
+                                        layout="vertical"
+                                        data={expenseByCategorySorted}
+                                        margin={CATEGORY_BAR_MARGIN}
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                        <XAxis
+                                            type="number"
+                                            tickFormatter={(v) => (Number.isFinite(v) ? Number(v).toFixed(0) : v)}
+                                        />
+                                        <YAxis
+                                            type="category"
+                                            dataKey="name"
+                                            width={148}
+                                            tick={{ fontSize: 12 }}
+                                            interval={0}
+                                        />
+                                        <Tooltip
+                                            formatter={(value) => [`${Number(value).toFixed(2)}`, 'Сумма']}
+                                            labelFormatter={(label) => label}
+                                        />
+                                        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                                            <LabelList
+                                                dataKey="value"
+                                                position="right"
+                                                offset={8}
+                                                formatter={(v) =>
+                                                    typeof v === 'number' ? v.toFixed(2) : Number(v).toFixed(2)
+                                                }
+                                                style={{
+                                                    fill: '#111827',
+                                                    fontSize: 12,
+                                                    fontWeight: 600,
+                                                }}
+                                            />
+                                            {expenseByCategorySorted.map((entry) => (
+                                                <Cell key={entry.name} fill={entry.color ?? '#9CA3AF'} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="rounded-lg bg-white p-6 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">

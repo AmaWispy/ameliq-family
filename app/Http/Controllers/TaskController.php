@@ -39,6 +39,7 @@ class TaskController extends Controller
                 'due_date' => $task->due_date->format('Y-m-d'),
                 'due_time' => $task->due_time,
                 'is_completed' => $task->is_completed,
+                'is_heavy' => $task->is_heavy,
             ],
             'return_date' => $request->string('date')->toString(),
         ]);
@@ -102,6 +103,7 @@ class TaskController extends Controller
                     'due_date' => $task->due_date->format('Y-m-d'),
                     'due_time' => $task->due_time,
                     'is_completed' => $task->is_completed,
+                    'is_heavy' => $task->is_heavy,
                 ];
             });
 
@@ -125,6 +127,7 @@ class TaskController extends Controller
             'due_date' => ['required', 'date'],
             'due_time' => ['nullable', 'string', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'is_completed' => ['nullable', 'boolean'],
+            'is_heavy' => ['nullable', 'boolean'],
         ]);
 
         $request->user()->tasks()->create($validated);
@@ -143,6 +146,7 @@ class TaskController extends Controller
             'due_date' => ['required', 'date'],
             'due_time' => ['nullable', 'string', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'is_completed' => ['required', 'boolean'],
+            'is_heavy' => ['nullable', 'boolean'],
         ]);
 
         $task->update($validated);

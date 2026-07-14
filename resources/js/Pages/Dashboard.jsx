@@ -207,8 +207,12 @@ export default function Dashboard({
                                         key={cell.dateKey}
                                         href={route('tasks.index', { date: cell.dateKey })}
                                         className={`block min-h-16 rounded-md border p-2 transition-colors focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
-                                            cell.tasks ? 'border-indigo-200 bg-indigo-50' : 'border-gray-200 bg-white'
-                                        } hover:border-indigo-300 hover:bg-indigo-50/60 ${cell.isToday ? 'ring-1 ring-indigo-500' : ''}`}
+                                            cell.tasks?.has_heavy
+                                                ? 'border-orange-300 bg-orange-50 hover:border-orange-400 hover:bg-orange-100/70'
+                                                : cell.tasks
+                                                  ? 'border-indigo-200 bg-indigo-50 hover:border-indigo-300 hover:bg-indigo-50/60'
+                                                  : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/60'
+                                        } ${cell.isToday ? 'ring-1 ring-indigo-500' : ''}`}
                                         aria-label={`Задачи на ${cell.dateKey}`}
                                     >
                                         <div className="flex h-full flex-col justify-between">
@@ -218,7 +222,9 @@ export default function Dashboard({
                                                     <span
                                                         className={`rounded-full p-[0.4rem] text-xs font-semibold leading-none ${
                                                             cell.tasks.open > 0
-                                                                ? 'bg-amber-100 text-amber-700'
+                                                                ? cell.tasks.has_heavy
+                                                                    ? 'bg-orange-200 text-orange-800'
+                                                                    : 'bg-amber-100 text-amber-700'
                                                                 : 'bg-emerald-100 text-emerald-700'
                                                         }`}
                                                         title="Невыполненные задачи"
@@ -246,7 +252,7 @@ export default function Dashboard({
                         </div>
                         <p className="mt-3 text-xs text-gray-500">
                             Нажмите на день, чтобы открыть список задач с фильтром по этой дате. Первая цифра — невыполненные задачи,
-                            вторая — выполнено.
+                            вторая — выполнено. Оранжевый день — есть тяжёлые задачи.
                         </p>
                     </div>
 

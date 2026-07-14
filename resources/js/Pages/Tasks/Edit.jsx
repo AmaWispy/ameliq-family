@@ -13,6 +13,7 @@ export default function Edit({ task, return_date: returnDate }) {
         due_date: task.due_date,
         due_time: task.due_time ?? '',
         is_completed: task.is_completed,
+        is_heavy: task.is_heavy ?? false,
         return_date: returnDate ?? '',
     });
 
@@ -84,6 +85,15 @@ export default function Edit({ task, return_date: returnDate }) {
                                     onChange={(e) => setData('is_completed', e.target.checked)}
                                 />
                                 Выполнено
+                            </label>
+                            <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_heavy}
+                                    onChange={(e) => setData('is_heavy', e.target.checked)}
+                                />
+                                Тяжёлая задача
+                                <span className="text-xs text-gray-500">(день выделится в календаре)</span>
                             </label>
                             <div className="flex items-center gap-2 md:col-span-2">
                                 <PrimaryButton disabled={processing}>Сохранить</PrimaryButton>

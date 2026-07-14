@@ -74,11 +74,12 @@ class DashboardController extends Controller
 
         $taskCalendar = Task::query()
             ->whereNotNull('due_date')
-            ->get(['due_date', 'is_completed'])
+            ->get(['due_date', 'is_completed', 'is_heavy'])
             ->groupBy(fn (Task $task) => $task->due_date->toDateString())
             ->map(fn ($items) => [
                 'total' => $items->count(),
                 'open' => $items->where('is_completed', false)->count(),
+                'has_heavy' => $items->contains(fn (Task $task) => $task->is_heavy),
             ]);
 
         $totalIncomeAllTime = (float) Income::query()->sum('amount');

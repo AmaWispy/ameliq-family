@@ -14,6 +14,7 @@ class Task extends Model
         'title',
         'description',
         'is_completed',
+        'is_heavy',
     ];
 
     protected function casts(): array
@@ -21,6 +22,7 @@ class Task extends Model
         return [
             'due_date' => 'date',
             'is_completed' => 'boolean',
+            'is_heavy' => 'boolean',
         ];
     }
 

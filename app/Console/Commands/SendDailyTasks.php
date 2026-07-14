@@ -42,6 +42,7 @@ class SendDailyTasks extends Command
         $tasks = Task::with('user')
             ->whereDate('due_date', $today)
             ->where('is_completed', false)
+            ->orderByDesc('is_heavy')
             ->orderBy('due_time')
             ->get();
 
@@ -50,18 +51,25 @@ class SendDailyTasks extends Command
             return self::SUCCESS;
         }
 
+        $hasHeavy = $tasks->contains(fn (Task $task) => $task->is_heavy);
+
         // 2. Формируем единый текст сообщения
-        $message = "📅 *Семейные задачи на сегодня (" . $today->format('d.m.Y') . "):*\n\n";
-        
+        $message = "📅 *Семейные задачи на сегодня (" . $today->format('d.m.Y') . "):*\n";
+        if ($hasHeavy) {
+            $message .= "⚡ _Есть тяжёлые задачи_\n";
+        }
+        $message .= "\n";
+
         foreach ($tasks as $task) {
             $time = $task->due_time ? " 🕒 " . substr($task->due_time, 0, 5) : "";
-            
-            $message .= "🔹 *{$task->title}*{$time}\n";
-            
+            $heavy = $task->is_heavy ? " ⚡" : "";
+
+            $message .= "🔹 *{$task->title}*{$time}{$heavy}\n";
+
             if ($task->description) {
                 $message .= "📝 _{$task->description}_\n";
             }
-            
+
             $message .= "\n";
         }
 
