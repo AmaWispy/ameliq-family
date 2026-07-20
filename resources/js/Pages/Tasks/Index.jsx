@@ -3,6 +3,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { taskCardClass, taskCardStyle } from '@/utils/taskColors';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useMemo } from 'react';
 
@@ -230,9 +231,8 @@ export default function Index({ tasks, filters }) {
                                         dayTasks.map((task) => (
                                             <div
                                                 key={task.id}
-                                                className={`flex items-start justify-between gap-3 rounded border p-3 ${
-                                                    task.is_heavy ? 'border-orange-300 bg-orange-50/60' : ''
-                                                }`}
+                                                className={`flex items-start justify-between gap-3 rounded border p-3 ${taskCardClass(task)}`}
+                                                style={taskCardStyle(task)}
                                             >
                                                 <div className="min-w-0 flex-1">
                                                     <p className="font-medium">

@@ -101,7 +101,8 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
     const [showPinModal, setShowPinModal] = useState(false);
     const [pin, setPin] = useState('');
     const [pinError, setPinError] = useState('');
-    const [hiddenPasswords, setHiddenPasswords] = useState({});
+    const [revealedPasswords, setRevealedPasswords] = useState({});
+    const verifyingPin = useRef(false);
 
     const searchSkipFirstDebounce = useRef(true);
     const skipNextSearchDebounce = useRef(false);
@@ -109,7 +110,7 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
     useEffect(() => {
         setData('type', type);
         setData('search', filters.search ?? '');
-        setHiddenPasswords({});
+        setRevealedPasswords({});
     }, [type, filters.search]);
 
     useEffect(() => {
@@ -119,6 +120,12 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
             setPinError('');
         }
     }, [passwordTabLocked]);
+
+    useEffect(() => {
+        if (pin.length === 4) {
+            verifyPinCode(pin);
+        }
+    }, [pin]);
 
     useEffect(() => {
         if (searchSkipFirstDebounce.current) {
@@ -161,10 +168,16 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
         );
     };
 
-    const verifyPin = async (e) => {
-        e.preventDefault();
+    const verifyPinCode = async (pinValue) => {
+        if (verifyingPin.current || pinValue.length !== 4) {
+            return;
+        }
+
+        verifyingPin.current = true;
+        setPinError('');
+
         try {
-            await axios.post(route('security.verify-pin'), { pin });
+            await axios.post(route('security.verify-pin'), { pin: pinValue });
             setShowPinModal(false);
             setPin('');
             setPinError('');
@@ -175,7 +188,15 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
             );
         } catch (error) {
             setPinError(error.response?.data?.error || 'Неверный код.');
+            setPin('');
+        } finally {
+            verifyingPin.current = false;
         }
+    };
+
+    const verifyPin = (e) => {
+        e.preventDefault();
+        verifyPinCode(pin);
     };
 
     const closePinModal = () => {
@@ -212,7 +233,7 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
     };
 
     const togglePasswordVisibility = (noteId) => {
-        setHiddenPasswords((prev) => ({
+        setRevealedPasswords((prev) => ({
             ...prev,
             [noteId]: !prev[noteId],
         }));
@@ -304,7 +325,7 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
                         <>
                             <div className="space-y-4">
                                 {notes.data.map((note) => {
-                                    const showPassword = hiddenPasswords[note.id] !== true;
+                                    const showPassword = revealedPasswords[note.id] === true;
 
                                     return (
                                         <div
@@ -517,10 +538,12 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
                             type="text"
                             name="pin"
                             value={pin}
-                            onChange={(e) => setPin(e.target.value)}
+                            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                             className="mt-1 block w-full text-center text-2xl tracking-[1em]"
                             autoFocus
                             maxLength={4}
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
                         />
                         <InputError message={pinError} className="mt-2" />
                     </div>
@@ -529,9 +552,6 @@ export default function Index({ notes, filters, passwordTabLocked = false }) {
                         <SecondaryButton type="button" onClick={closePinModal}>
                             Отмена
                         </SecondaryButton>
-                        <PrimaryButton className="ms-3" disabled={pin.length !== 4}>
-                            Подтвердить
-                        </PrimaryButton>
                     </div>
                 </form>
             </Modal>

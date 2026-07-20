@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,6 +41,7 @@ class TaskController extends Controller
                 'due_time' => $task->due_time,
                 'is_completed' => $task->is_completed,
                 'is_heavy' => $task->is_heavy,
+                'color' => $task->color,
             ],
             'return_date' => $request->string('date')->toString(),
         ]);
@@ -104,6 +106,7 @@ class TaskController extends Controller
                     'due_time' => $task->due_time,
                     'is_completed' => $task->is_completed,
                     'is_heavy' => $task->is_heavy,
+                    'color' => $task->color,
                 ];
             });
 
@@ -121,6 +124,10 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge([
+            'color' => $request->input('color') ?: null,
+        ]);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -128,6 +135,7 @@ class TaskController extends Controller
             'due_time' => ['nullable', 'string', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'is_completed' => ['nullable', 'boolean'],
             'is_heavy' => ['nullable', 'boolean'],
+            'color' => ['nullable', 'string', Rule::in(Task::COLORS)],
         ]);
 
         $request->user()->tasks()->create($validated);
@@ -140,6 +148,10 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
+        $request->merge([
+            'color' => $request->input('color') ?: null,
+        ]);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -147,6 +159,7 @@ class TaskController extends Controller
             'due_time' => ['nullable', 'string', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'is_completed' => ['required', 'boolean'],
             'is_heavy' => ['nullable', 'boolean'],
+            'color' => ['nullable', 'string', Rule::in(Task::COLORS)],
         ]);
 
         $task->update($validated);

@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatTimeInput } from '@/utils/formatTimeInput';
+import { TASK_COLORS } from '@/utils/taskColors';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Edit({ task, return_date: returnDate }) {
@@ -14,6 +15,7 @@ export default function Edit({ task, return_date: returnDate }) {
         due_time: task.due_time ?? '',
         is_completed: task.is_completed,
         is_heavy: task.is_heavy ?? false,
+        color: task.color ?? '',
         return_date: returnDate ?? '',
     });
 
@@ -77,6 +79,42 @@ export default function Edit({ task, return_date: returnDate }) {
                                     onChange={(e) => setData('description', e.target.value)}
                                 />
                                 <InputError message={errors.description} className="mt-1" />
+                            </div>
+                            <div className="md:col-span-2">
+                                <InputLabel value="Цвет" />
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setData('color', '')}
+                                        className={`rounded-md border px-3 py-1.5 text-sm ${
+                                            !data.color
+                                                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                                : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        Без цвета
+                                    </button>
+                                    {TASK_COLORS.map((item) => (
+                                        <button
+                                            key={item.value}
+                                            type="button"
+                                            title={item.label}
+                                            onClick={() => setData('color', item.value)}
+                                            className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-sm ${
+                                                data.color === item.value
+                                                    ? 'border-gray-900 bg-white shadow-sm'
+                                                    : 'border-gray-200 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <span
+                                                className="h-5 w-5 shrink-0 rounded-full border border-black/10"
+                                                style={{ backgroundColor: item.hex }}
+                                            />
+                                            <span className="text-gray-700">{item.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <InputError message={errors.color} className="mt-1" />
                             </div>
                             <label className="inline-flex items-center gap-2 text-sm text-gray-700">
                                 <input

@@ -15,7 +15,10 @@ class Task extends Model
         'description',
         'is_completed',
         'is_heavy',
+        'color',
     ];
+
+    public const COLORS = ['red', 'blue', 'yellow', 'purple'];
 
     protected function casts(): array
     {

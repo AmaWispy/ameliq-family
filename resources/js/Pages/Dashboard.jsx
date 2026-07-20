@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { taskColorMeta } from '@/utils/taskColors';
 import { Head, Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import {
@@ -233,16 +234,36 @@ export default function Dashboard({
                                                     </span>
                                                 ) : null}
                                             </div>
-                                            {cell.tasks && cell.tasks.total - cell.tasks.open > 0 ? (
-                                                <div className="mt-1 flex justify-end">
+                                            <div className="mt-1 flex items-end justify-between gap-1">
+                                                {cell.tasks?.colors?.length ? (
+                                                    <div className="flex flex-wrap gap-0.5">
+                                                        {cell.tasks.colors.map((color) => {
+                                                            const meta = taskColorMeta(color);
+                                                            if (!meta) {
+                                                                return null;
+                                                            }
+                                                            return (
+                                                                <span
+                                                                    key={color}
+                                                                    className="h-2 w-2 rounded-full"
+                                                                    style={{ backgroundColor: meta.hex }}
+                                                                    title={meta.label}
+                                                                />
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <span />
+                                                )}
+                                                {cell.tasks && cell.tasks.total - cell.tasks.open > 0 ? (
                                                     <span
                                                         className="rounded-full bg-emerald-100 p-[0.4rem] text-xs font-semibold leading-none text-emerald-700"
                                                         title="Выполнено"
                                                     >
                                                         {cell.tasks.total - cell.tasks.open}
                                                     </span>
-                                                </div>
-                                            ) : null}
+                                                ) : null}
+                                            </div>
                                         </div>
                                     </Link>
                                 ) : (
@@ -252,7 +273,7 @@ export default function Dashboard({
                         </div>
                         <p className="mt-3 text-xs text-gray-500">
                             Нажмите на день, чтобы открыть список задач с фильтром по этой дате. Первая цифра — невыполненные задачи,
-                            вторая — выполнено. Оранжевый день — есть тяжёлые задачи.
+                            вторая — выполнено. Оранжевый день — есть незавершённые тяжёлые задачи. Цветные точки — цвета открытых задач.
                         </p>
                     </div>
 
