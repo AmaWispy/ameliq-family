@@ -3,12 +3,12 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { formatTimeInput } from '@/utils/formatTimeInput';
+import { completeTimeInput, formatTimeInput } from '@/utils/formatTimeInput';
 import { TASK_COLORS } from '@/utils/taskColors';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Edit({ task, return_date: returnDate }) {
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors, transform } = useForm({
         title: task.title,
         description: task.description ?? '',
         due_date: task.due_date,
@@ -21,6 +21,10 @@ export default function Edit({ task, return_date: returnDate }) {
 
     const submit = (e) => {
         e.preventDefault();
+        transform((form) => ({
+            ...form,
+            due_time: form.due_time ? completeTimeInput(form.due_time) : '',
+        }));
         put(route('tasks.update', task.id));
     };
 
@@ -63,10 +67,11 @@ export default function Edit({ task, return_date: returnDate }) {
                                     inputMode="numeric"
                                     autoComplete="off"
                                     placeholder="00:00"
-                                    maxLength={5}
+                                    maxLength={6}
                                     className="mt-1 block w-full max-w-[8rem] font-mono tabular-nums"
                                     value={data.due_time}
-                                    onChange={(e) => setData('due_time', formatTimeInput(e.target.value))}
+                                    onChange={(e) => setData('due_time', formatTimeInput(e.target.value, data.due_time))}
+                                    onBlur={() => setData('due_time', completeTimeInput(data.due_time))}
                                 />
                                 <InputError message={errors.due_time} className="mt-1" />
                             </div>

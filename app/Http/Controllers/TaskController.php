@@ -131,14 +131,33 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'due_date' => ['required', 'date'],
+            'due_date' => ['nullable', 'required_without:due_dates', 'date'],
+            'due_dates' => ['nullable', 'array', 'min:1', 'max:366'],
+            'due_dates.*' => ['required', 'date'],
             'due_time' => ['nullable', 'string', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'is_completed' => ['nullable', 'boolean'],
             'is_heavy' => ['nullable', 'boolean'],
             'color' => ['nullable', 'string', Rule::in(Task::COLORS)],
         ]);
 
-        $request->user()->tasks()->create($validated);
+        $dates = collect($validated['due_dates'] ?? [])
+            ->push($validated['due_date'] ?? null)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($dates->isEmpty()) {
+            return back()->withErrors(['due_date' => 'Укажите хотя бы одну дату.']);
+        }
+
+        unset($validated['due_dates'], $validated['due_date']);
+
+        foreach ($dates as $date) {
+            $request->user()->tasks()->create([
+                ...$validated,
+                'due_date' => $date,
+            ]);
+        }
 
         return redirect()->route('tasks.index');
     }

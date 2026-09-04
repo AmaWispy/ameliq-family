@@ -18,7 +18,7 @@ class Task extends Model
         'color',
     ];
 
-    public const COLORS = ['red', 'blue', 'yellow', 'purple'];
+    public const COLORS = ['red', 'blue', 'yellow', 'purple', 'emerald', 'black'];
 
     protected function casts(): array
     {

@@ -39,6 +39,26 @@ export const TASK_COLORS = [
         card: 'border-purple-300 bg-purple-50',
         dot: 'bg-purple-500',
     },
+    {
+        value: 'emerald',
+        label: 'Изумрудный',
+        hex: '#10b981',
+        softHex: '#ecfdf5',
+        borderHex: '#6ee7b7',
+        swatch: 'bg-emerald-500',
+        card: 'border-emerald-300 bg-emerald-50',
+        dot: 'bg-emerald-500',
+    },
+    {
+        value: 'black',
+        label: 'Чёрный',
+        hex: '#111827',
+        softHex: '#f3f4f6',
+        borderHex: '#9ca3af',
+        swatch: 'bg-gray-900',
+        card: 'border-gray-400 bg-gray-100',
+        dot: 'bg-gray-900',
+    },
 ];
 
 export function taskColorMeta(color) {
