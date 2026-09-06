@@ -67,11 +67,11 @@ export default function Edit({ task, return_date: returnDate }) {
                                     inputMode="numeric"
                                     autoComplete="off"
                                     placeholder="00:00"
-                                    maxLength={6}
+                                    maxLength={5}
                                     className="mt-1 block w-full max-w-[8rem] font-mono tabular-nums"
                                     value={data.due_time}
-                                    onChange={(e) => setData('due_time', formatTimeInput(e.target.value, data.due_time))}
-                                    onBlur={() => setData('due_time', completeTimeInput(data.due_time))}
+                                    onChange={(e) => setData('due_time', formatTimeInput(e.target.value))}
+                                    onBlur={(e) => setData('due_time', completeTimeInput(e.target.value))}
                                 />
                                 <InputError message={errors.due_time} className="mt-1" />
                             </div>

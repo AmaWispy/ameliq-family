@@ -1,31 +1,12 @@
 /**
- * Форматирует ввод в маску ЧЧ:ММ.
- * После двух цифр часов подставляет :00, минуты можно дописать.
+ * Форматирует ввод в маску ЧЧ:ММ (только цифры, максимум 4).
+ * Минуты :00 дописываются при потере фокуса / отправке, а не во время ввода.
  */
-export function formatTimeInput(raw, previous = '') {
-    let digits = String(raw ?? '').replace(/\D/g, '');
-    const prevDigits = String(previous ?? '').replace(/\D/g, '');
+export function formatTimeInput(raw) {
+    const digits = String(raw ?? '').replace(/\D/g, '').slice(0, 4);
 
-    if (digits.length > 4 && prevDigits.length === 4 && prevDigits.slice(2) === '00') {
-        digits = prevDigits.slice(0, 2) + digits.slice(4);
-    }
-
-    digits = digits.slice(0, 4);
-
-    if (digits.length === 0) {
-        return '';
-    }
-
-    if (digits.length === 1) {
+    if (digits.length <= 2) {
         return digits;
-    }
-
-    if (digits.length === 2) {
-        if (prevDigits.length >= 3 && prevDigits.length > digits.length) {
-            return `${digits}:`;
-        }
-
-        return `${digits}:00`;
     }
 
     return `${digits.slice(0, 2)}:${digits.slice(2)}`;
