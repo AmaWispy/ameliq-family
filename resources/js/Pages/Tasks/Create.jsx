@@ -4,8 +4,9 @@ import Modal from '@/Components/Modal';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
+import TimeInput from '@/Components/TimeInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { completeTimeInput, formatTimeInput } from '@/utils/formatTimeInput';
+import { completeTimeInput } from '@/utils/formatTimeInput';
 import { TASK_COLORS } from '@/utils/taskColors';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
@@ -227,17 +228,11 @@ export default function Create({ defaultDueDate }) {
                             </div>
                             <div>
                                 <InputLabel htmlFor="due_time" value="Время" />
-                                <TextInput
+                                <TimeInput
                                     id="due_time"
-                                    type="text"
-                                    inputMode="numeric"
-                                    autoComplete="off"
-                                    placeholder="00:00"
-                                    maxLength={5}
                                     className="mt-1 block w-full max-w-[8rem] font-mono tabular-nums"
                                     value={data.due_time}
-                                    onChange={(e) => setData('due_time', formatTimeInput(e.target.value))}
-                                    onBlur={(e) => setData('due_time', completeTimeInput(e.target.value))}
+                                    onChange={(value) => setData('due_time', value)}
                                 />
                                 <InputError message={errors.due_time} className="mt-1" />
                             </div>
