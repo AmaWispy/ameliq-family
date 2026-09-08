@@ -1,8 +1,29 @@
 import InputError from '@/Components/InputError';
+import Modal from '@/Components/Modal';
 import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
+
+function parseShoppingLines(text) {
+    return String(text ?? '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+            const match = line.match(/^(.*)\s+(\d+(?:[.,]\d+)?)$/);
+            if (match && match[1].trim()) {
+                return {
+                    name: match[1].trim(),
+                    quantity: Number(match[2].replace(',', '.')),
+                };
+            }
+
+            return { name: line, quantity: 1 };
+        });
+}
 
 function NewItemForm({ listId }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -46,7 +67,68 @@ function NewItemForm({ listId }) {
     );
 }
 
+function BulkItemsModal({ listId, show, onClose }) {
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
+        text: '',
+    });
+
+    const preview = useMemo(() => parseShoppingLines(data.text).slice(0, 200), [data.text]);
+
+    const close = () => {
+        reset();
+        clearErrors();
+        onClose();
+    };
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(route('shopping-items.store-bulk', listId), {
+            onSuccess: () => close(),
+        });
+    };
+
+    return (
+        <Modal show={show} onClose={close} maxWidth="lg">
+            <form onSubmit={submit} className="p-6">
+                <h2 className="text-lg font-medium text-gray-900">Добавить списком</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                    Каждая строка — отдельный продукт. Число в конце строки станет количеством.
+                </p>
+
+                <textarea
+                    className="mt-4 block w-full rounded-md border-gray-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    rows={10}
+                    placeholder={'молоко 3\nкефир 1\nчебуреки\nморковь чищенная 1.5'}
+                    value={data.text}
+                    onChange={(e) => setData('text', e.target.value)}
+                    autoFocus
+                />
+                <InputError className="mt-2" message={errors.text} />
+
+                {preview.length > 0 ? (
+                    <p className="mt-3 text-sm text-gray-600">
+                        Будет добавлено: {preview.length}
+                    </p>
+                ) : (
+                    <p className="mt-3 text-sm text-gray-400">Пока нет строк для добавления.</p>
+                )}
+
+                <div className="mt-6 flex justify-end gap-2">
+                    <SecondaryButton type="button" onClick={close}>
+                        Отмена
+                    </SecondaryButton>
+                    <PrimaryButton disabled={processing || preview.length === 0}>
+                        Добавить
+                    </PrimaryButton>
+                </div>
+            </form>
+        </Modal>
+    );
+}
+
 export default function Show({ shoppingList }) {
+    const [showBulkModal, setShowBulkModal] = useState(false);
+
     return (
         <AuthenticatedLayout
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">{shoppingList.name}</h2>}
@@ -66,6 +148,13 @@ export default function Show({ shoppingList }) {
                             >
                                 Редактировать название
                             </Link>
+                            <button
+                                type="button"
+                                onClick={() => setShowBulkModal(true)}
+                                className="rounded-md border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100"
+                            >
+                                Добавить списком
+                            </button>
                         </div>
 
                         <NewItemForm listId={shoppingList.id} />
@@ -134,6 +223,12 @@ export default function Show({ shoppingList }) {
                     </div>
                 </div>
             </div>
+
+            <BulkItemsModal
+                listId={shoppingList.id}
+                show={showBulkModal}
+                onClose={() => setShowBulkModal(false)}
+            />
         </AuthenticatedLayout>
     );
 }

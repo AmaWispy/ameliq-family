@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/shopping-items/{shoppingItem}/edit', [ShoppingItemController::class, 'edit'])->name('shopping-items.edit');
     Route::resource('shopping-lists', ShoppingListController::class);
     Route::post('/shopping-lists/{shoppingList}/items', [ShoppingItemController::class, 'store'])->name('shopping-items.store');
+    Route::post('/shopping-lists/{shoppingList}/items/bulk', [ShoppingItemController::class, 'storeBulk'])->name('shopping-items.store-bulk');
     Route::put('/shopping-items/{shoppingItem}', [ShoppingItemController::class, 'update'])->name('shopping-items.update');
     Route::delete('/shopping-items/{shoppingItem}', [ShoppingItemController::class, 'destroy'])->name('shopping-items.destroy');
 

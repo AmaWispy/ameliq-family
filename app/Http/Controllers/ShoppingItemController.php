@@ -41,6 +41,63 @@ class ShoppingItemController extends Controller
         return redirect()->route('shopping-lists.show', $shoppingList);
     }
 
+    public function storeBulk(Request $request, ShoppingList $shoppingList)
+    {
+        $validated = $request->validate([
+            'text' => ['required', 'string', 'max:10000'],
+        ]);
+
+        $items = $this->parseShoppingLines($validated['text']);
+
+        if ($items === []) {
+            return back()->withErrors([
+                'text' => 'Добавьте хотя бы одну строку с продуктом.',
+            ]);
+        }
+
+        foreach ($items as $item) {
+            $shoppingList->items()->create($item);
+        }
+
+        return redirect()->route('shopping-lists.show', $shoppingList);
+    }
+
+    /**
+     * @return list<array{name: string, quantity: float}>
+     */
+    private function parseShoppingLines(string $text): array
+    {
+        $items = [];
+
+        foreach (preg_split('/\R/u', $text) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            if (preg_match('/^(.*)\s+(\d+(?:[.,]\d+)?)$/u', $line, $matches)) {
+                $name = trim($matches[1]);
+                $quantity = (float) str_replace(',', '.', $matches[2]);
+
+                if ($name !== '' && $quantity > 0) {
+                    $items[] = [
+                        'name' => mb_substr($name, 0, 120),
+                        'quantity' => $quantity,
+                    ];
+
+                    continue;
+                }
+            }
+
+            $items[] = [
+                'name' => mb_substr($line, 0, 120),
+                'quantity' => 1,
+            ];
+        }
+
+        return array_slice($items, 0, 200);
+    }
+
     public function update(Request $request, ShoppingItem $shoppingItem)
     {
         $validated = $request->validate([
