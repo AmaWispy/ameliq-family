@@ -35,6 +35,10 @@ export default function Index({ expenses, categories, filters, expense_by_catego
     };
 
     const total = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+    const savingsTotal = expenses.reduce(
+        (sum, item) => sum + (item.account_name ? Number(item.amount) : 0),
+        0,
+    );
     const showCategoryChart =
         Boolean(filters.show_category_chart) && expenseByCategory.length > 0;
 
@@ -183,7 +187,12 @@ export default function Index({ expenses, categories, filters, expense_by_catego
                     <div className="rounded-lg bg-white p-6 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                             <h3 className="text-lg font-medium">Список</h3>
-                            <p className="text-sm text-gray-600">Итого: {total.toFixed(2)}</p>
+                            <p className="text-right text-sm text-gray-600">
+                                Итого: {total.toFixed(2)}
+                                {savingsTotal > 0 ? (
+                                    <span className="mt-0.5 block text-amber-700">в копилку: {savingsTotal.toFixed(2)}</span>
+                                ) : null}
+                            </p>
                         </div>
                         <div className="space-y-2">
                             {expenses.map((expense) => (
@@ -192,6 +201,11 @@ export default function Index({ expenses, categories, filters, expense_by_catego
                                         <p className="font-medium">{expense.spent_on}</p>
                                         <p className="text-sm text-gray-600">
                                             {expense.category_name} {expense.note ? `- ${expense.note}` : ''}
+                                            {expense.account_name ? (
+                                                <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                                                    Копилка · {expense.account_name}
+                                                </span>
+                                            ) : null}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-3">

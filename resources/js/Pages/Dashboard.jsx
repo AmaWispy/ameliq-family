@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { taskColorMeta } from '@/utils/taskColors';
 import { Head, Link } from '@inertiajs/react';
+import { IconCashMinus, IconCashPlus } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import {
     Bar,
@@ -30,8 +31,9 @@ export default function Dashboard({
     expense_by_category: expenseByCategory,
     task_calendar: taskCalendar = {},
     calendar_month: initialCalendarMonth,
+    favorite_accounts: favoriteAccounts = [],
 }) {
-    const balance = Number(stats.total_income) - Number(stats.total_expense);
+    const balance = Number(stats.total_income) - Number(stats.total_expense) - Number(stats.piggy_deduction || 0);
     const [calendarMonth, setCalendarMonth] = useState(
         initialCalendarMonth ?? new Date().toISOString().slice(0, 7),
     );
@@ -134,16 +136,48 @@ export default function Dashboard({
             <div className="py-12">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
                     <div className="grid gap-6 md:grid-cols-2">
-                        <div className="rounded-lg bg-white p-6 shadow-sm">
-                            <p className="text-sm text-gray-500">Баланс за период</p>
-                            <p className="mt-1 text-3xl font-semibold text-indigo-700 tabular-nums">{balance.toFixed(2)}</p>
-                            <p className="mt-2 text-xs text-gray-500">
-                                {stats.period_start} — {stats.period_end}
-                            </p>
+                        <div className="flex items-start justify-between gap-3 rounded-lg bg-white p-6 shadow-sm">
+                            <div>
+                                <p className="text-sm text-gray-500">Баланс за период</p>
+                                <p className="mt-1 text-3xl font-semibold text-indigo-700 tabular-nums">{balance.toFixed(2)}</p>
+                                {Number(stats.piggy_deduction) !== 0 ? (
+                                    <p className="mt-1 text-sm text-amber-700 tabular-nums">
+                                        {Number(stats.piggy_deduction) > 0
+                                            ? `в копилку: −${Number(stats.piggy_deduction).toFixed(2)}`
+                                            : `из копилки: +${Math.abs(Number(stats.piggy_deduction)).toFixed(2)}`}
+                                    </p>
+                                ) : null}
+                                <p className="mt-2 text-xs text-gray-500">
+                                    {stats.period_start} — {stats.period_end}
+                                </p>
+                            </div>
+                            <div className="flex shrink-0 flex-col gap-2">
+                                <Link
+                                    href={route('incomes.create')}
+                                    title="Добавить доход"
+                                    className="flex h-10 w-16 items-center justify-center rounded-md border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                                >
+                                    <IconCashPlus size={24} stroke={2} />
+                                </Link>
+                                <Link
+                                    href={route('expenses.create')}
+                                    title="Добавить расход"
+                                    className="flex h-10 w-16 items-center justify-center rounded-md border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                                >
+                                    <IconCashMinus size={24} stroke={2} />
+                                </Link>
+                            </div>
                         </div>
                         <div className="rounded-lg bg-white p-6 shadow-sm">
                             <p className="text-sm text-gray-500">Общий остаток (с учетом переноса)</p>
                             <p className="mt-1 text-3xl font-semibold text-emerald-700 tabular-nums">{Number(stats.total_balance).toFixed(2)}</p>
+                            {Number(stats.piggy_deduction_all) !== 0 ? (
+                                <p className="mt-1 text-sm text-amber-700 tabular-nums">
+                                    {Number(stats.piggy_deduction_all) > 0
+                                        ? `в копилку: −${Number(stats.piggy_deduction_all).toFixed(2)}`
+                                        : `из копилки: +${Math.abs(Number(stats.piggy_deduction_all)).toFixed(2)}`}
+                                </p>
+                            ) : null}
                             <p className="mt-2 text-xs text-gray-500">
                                 Весь период
                             </p>
@@ -349,9 +383,53 @@ export default function Dashboard({
                                     <Line type="monotone" dataKey="expense" name="Расход" stroke="#dc2626" strokeWidth={2} />
                                     <Line type="monotone" dataKey="balance" name="Баланс периода" stroke="#94a3b8" strokeWidth={1} strokeDasharray="5 5" />
                                     <Line type="monotone" dataKey="cumulative_balance" name="Накопленный баланс" stroke="#4f46e5" strokeWidth={3} />
+                                    <Line type="monotone" dataKey="accounts" name="Копилки" stroke="#d97706" strokeWidth={2} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
+                    </div>
+
+                    <div className="rounded-lg bg-white p-4 shadow-sm">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                            <h3 className="text-lg font-medium text-gray-800">Копилка</h3>
+                            <Link href={route('accounts.index')} className="text-sm text-indigo-600 hover:underline">
+                                Вся копилка
+                            </Link>
+                        </div>
+                        {favoriteAccounts.length > 0 ? (
+                            <div className="divide-y divide-gray-100">
+                                {favoriteAccounts.map((account) => {
+                                    const isDebt = account.is_negative;
+                                    const percent = account.goal_amount
+                                        ? (Number(account.balance) / Number(account.goal_amount)) * 100
+                                        : null;
+                                    const tone = isDebt ? 'text-red-700' : 'text-gray-900';
+
+                                    return (
+                                        <Link
+                                            key={account.id}
+                                            href={route('accounts.show', account.id)}
+                                            className="flex items-baseline justify-between gap-3 py-2 hover:bg-gray-50"
+                                        >
+                                            <span className={`min-w-0 truncate font-medium ${tone}`}>{account.name}</span>
+                                            <span className={`shrink-0 tabular-nums ${tone}`}>
+                                                {isDebt ? '−' : ''}
+                                                {Number(Math.abs(account.balance)).toFixed(2)}
+                                                {percent !== null ? (
+                                                    <span className="ml-2 text-xs font-normal text-gray-400">
+                                                        {percent.toFixed(0)}%
+                                                    </span>
+                                                ) : null}
+                                            </span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p className="py-1 text-sm text-gray-600">
+                                Добавьте копилку в избранное, чтобы она появилась здесь.
+                            </p>
+                        )}
                     </div>
 
                     <div className="rounded-lg bg-white p-4 shadow-sm">
@@ -386,6 +464,11 @@ export default function Dashboard({
                             <p className="mt-1 text-2xl font-semibold text-red-700 tabular-nums">
                                 {Number(stats.total_expense).toFixed(2)}
                             </p>
+                            {Number(stats.savings_expense) > 0 ? (
+                                <p className="mt-1 text-sm text-amber-700 tabular-nums">
+                                    из них в копилку: {Number(stats.savings_expense).toFixed(2)}
+                                </p>
+                            ) : null}
                             <p className="mt-2 text-xs text-gray-500">
                                 {stats.period_start} — {stats.period_end}
                             </p>

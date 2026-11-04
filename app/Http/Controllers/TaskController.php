@@ -84,6 +84,7 @@ class TaskController extends Controller
 
         $tasksQuery = Task::query()
             ->orderBy('due_date')
+            ->orderBy('is_completed')
             ->orderByRaw('CASE WHEN due_time IS NULL THEN 1 ELSE 0 END')
             ->orderBy('due_time')
             ->orderBy('id');
@@ -198,6 +199,9 @@ class TaskController extends Controller
     {
         $task->delete();
 
-        return redirect()->route('tasks.index');
+        return redirect()->route('tasks.index', [
+            'date' => $request->input('date', ''),
+            'end_date' => $request->input('end_date', ''),
+        ]);
     }
 }

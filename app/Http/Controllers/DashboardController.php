@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
+use App\Models\AccountTransaction;
 use App\Models\Expense;
 use App\Models\Income;
 use App\Models\Task;
@@ -26,7 +28,7 @@ class DashboardController extends Controller
         $initialExpense = (float) Expense::query()
             ->whereDate('spent_on', '<', $firstPeriodStart->toDateString())
             ->sum('amount');
-        $currentCumulativeBalance = $initialIncome - $initialExpense;
+        $currentCumulativeBalance = $initialIncome - $initialExpense - $this->piggyDeduction(before: $firstPeriodStart->toDateString());
 
         $months = [];
         for ($offset = 5; $offset >= 0; $offset--) {
@@ -43,7 +45,8 @@ class DashboardController extends Controller
                 ->whereDate('spent_on', '<', $end->toDateString())
                 ->sum('amount');
 
-            $periodBalance = $income - $expense;
+            $piggy = $this->piggyDeduction($start->toDateString(), $end->toDateString());
+            $periodBalance = $income - $expense - $piggy;
             $currentCumulativeBalance += $periodBalance;
 
             $months[] = [
@@ -52,6 +55,7 @@ class DashboardController extends Controller
                 'expense' => round($expense, 2),
                 'balance' => round($periodBalance, 2),
                 'cumulative_balance' => round($currentCumulativeBalance, 2),
+                'accounts' => round($piggy, 2),
             ];
         }
 
@@ -93,6 +97,22 @@ class DashboardController extends Controller
 
         $totalIncomeAllTime = (float) Income::query()->sum('amount');
         $totalExpenseAllTime = (float) Expense::query()->sum('amount');
+        $piggyDeductionAllTime = $this->piggyDeduction();
+        $piggyDeductionPeriod = $this->piggyDeduction($periodStart->toDateString(), $periodEnd->toDateString());
+
+        $favoriteAccounts = Account::query()
+            ->where('is_favorite', true)
+            ->withSum(['transactions as deposits_sum' => fn ($query) => $query->where('type', Account::TYPE_DEPOSIT)], 'amount')
+            ->withSum(['transactions as withdrawals_sum' => fn ($query) => $query->where('type', Account::TYPE_WITHDRAWAL)], 'amount')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Account $account) => [
+                'id' => $account->id,
+                'name' => $account->name,
+                'is_negative' => $account->is_negative,
+                'goal_amount' => $account->goal_amount !== null ? (float) $account->goal_amount : null,
+                'balance' => $account->balance(),
+            ]);
 
         return Inertia::render('Dashboard', [
             'stats' => [
@@ -104,7 +124,14 @@ class DashboardController extends Controller
                     ->whereDate('spent_on', '>=', $periodStart->toDateString())
                     ->whereDate('spent_on', '<', $periodEnd->toDateString())
                     ->sum('amount'), 2),
-                'total_balance' => round($totalIncomeAllTime - $totalExpenseAllTime, 2),
+                'savings_expense' => round((float) Expense::query()
+                    ->whereNotNull('account_transaction_id')
+                    ->whereDate('spent_on', '>=', $periodStart->toDateString())
+                    ->whereDate('spent_on', '<', $periodEnd->toDateString())
+                    ->sum('amount'), 2),
+                'piggy_deduction' => round($piggyDeductionPeriod, 2),
+                'piggy_deduction_all' => round($piggyDeductionAllTime, 2),
+                'total_balance' => round($totalIncomeAllTime - $totalExpenseAllTime - $piggyDeductionAllTime, 2),
                 'open_tasks' => Task::query()->where('is_completed', false)->count(),
                 'period_start' => $periodStart->toDateString(),
                 'period_end' => $periodEnd->toDateString(),
@@ -113,6 +140,42 @@ class DashboardController extends Controller
             'expense_by_category' => $expensesByCategory,
             'task_calendar' => $taskCalendar,
             'calendar_month' => $now->format('Y-m'),
+            'favorite_accounts' => $favoriteAccounts,
         ]);
+    }
+
+    private function piggyDeduction(?string $from = null, ?string $until = null, ?string $before = null): float
+    {
+        $deposits = $this->balanceAdjustingTransactions($from, $until, $before)
+            ->where('type', Account::TYPE_DEPOSIT)
+            ->whereDoesntHave('expense')
+            ->sum('amount');
+
+        $withdrawals = $this->balanceAdjustingTransactions($from, $until, $before)
+            ->where('type', Account::TYPE_WITHDRAWAL)
+            ->sum('amount');
+
+        return (float) $deposits - (float) $withdrawals;
+    }
+
+    private function balanceAdjustingTransactions(?string $from, ?string $until, ?string $before)
+    {
+        $query = AccountTransaction::query()
+            ->where('deducts_balance', true)
+            ->whereHas('account', fn ($accounts) => $accounts->where('is_negative', false));
+
+        if ($before !== null) {
+            $query->whereDate('happened_on', '<', $before);
+        }
+
+        if ($from !== null) {
+            $query->whereDate('happened_on', '>=', $from);
+        }
+
+        if ($until !== null) {
+            $query->whereDate('happened_on', '<', $until);
+        }
+
+        return $query;
     }
 }

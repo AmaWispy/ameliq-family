@@ -81,6 +81,12 @@ export default function AuthenticatedLayout({ children }) {
                                     Доходы
                                 </NavLink>
                                 <NavLink
+                                    href={route('accounts.index')}
+                                    active={route().current('accounts.*')}
+                                >
+                                    Копилка
+                                </NavLink>
+                                <NavLink
                                     href={route('notes.index')}
                                     active={route().current('notes.*')}
                                 >
@@ -121,6 +127,13 @@ export default function AuthenticatedLayout({ children }) {
                                     title="Доходы"
                                 >
                                     <IconCashPlus size={24} stroke={2} />
+                                </MobileNavLink>
+                                <MobileNavLink
+                                    href={route('accounts.index')}
+                                    active={route().current('accounts.*')}
+                                    title="Копилка"
+                                >
+                                    <IconWallet size={24} stroke={2} />
                                 </MobileNavLink>
                                 <MobileNavLink
                                     href={route('notes.index')}
@@ -251,6 +264,15 @@ export default function AuthenticatedLayout({ children }) {
                                 <div className="flex items-center gap-2">
                                     <IconTags size={18} />
                                     Категории расходов
+                                </div>
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                href={route('accounts.index')}
+                                active={route().current('accounts.*')}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <IconWallet size={18} />
+                                    Копилка
                                 </div>
                             </ResponsiveNavLink>
                             <ResponsiveNavLink

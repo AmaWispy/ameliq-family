@@ -83,4 +83,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Note::class);
     }
+
+    public function accounts(): HasMany
+    {
+        return $this->hasMany(Account::class);
+    }
+
+    public function accountTransactions(): HasMany
+    {
+        return $this->hasMany(AccountTransaction::class);
+    }
 }

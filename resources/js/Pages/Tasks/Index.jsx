@@ -31,7 +31,14 @@ export default function Index({ tasks, filters }) {
 
     const removeTask = (taskId) => {
         if (!window.confirm('Удалить задачу?')) return;
-        router.delete(route('tasks.destroy', taskId));
+        router.delete(route('tasks.destroy', taskId), {
+            data: {
+                date: filterData.date,
+                end_date: filterData.end_date,
+            },
+            preserveScroll: true,
+            preserveState: false,
+        });
     };
 
     // Генерируем список дней в диапазоне, чтобы показать блоки для каждого дня
@@ -216,7 +223,9 @@ export default function Index({ tasks, filters }) {
                     )}
 
                     {displayDays.map((day) => {
-                        const dayTasks = groupedTasks[day] || [];
+                        const dayTasks = [...(groupedTasks[day] || [])].sort(
+                            (a, b) => Number(Boolean(a.is_completed)) - Number(Boolean(b.is_completed)),
+                        );
                         if (dayTasks.length === 0 && daysInRange.length === 0) return null;
 
                         return (

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AutoExpenseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
@@ -29,6 +30,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('expenses', ExpenseController::class)->except(['show']);
     Route::resource('auto-expenses', AutoExpenseController::class)->except(['show']);
     Route::resource('incomes', IncomeController::class)->except(['show']);
+    Route::patch('/accounts/{account}/favorite', [AccountController::class, 'toggleFavorite'])->name('accounts.toggle-favorite');
+    Route::post('/accounts/{account}/transactions', [AccountController::class, 'storeTransaction'])->name('accounts.transactions.store');
+    Route::delete('/accounts/{account}/transactions/{transaction}', [AccountController::class, 'destroyTransaction'])->name('accounts.transactions.destroy');
+    Route::resource('accounts', AccountController::class);
     Route::get('/shopping-items/{shoppingItem}/edit', [ShoppingItemController::class, 'edit'])->name('shopping-items.edit');
     Route::resource('shopping-lists', ShoppingListController::class);
     Route::post('/shopping-lists/{shoppingList}/items', [ShoppingItemController::class, 'store'])->name('shopping-items.store');

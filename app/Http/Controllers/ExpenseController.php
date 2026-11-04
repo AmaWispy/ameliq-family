@@ -73,7 +73,7 @@ class ExpenseController extends Controller
             || $endDate !== $defaultEnd->toDateString();
 
         $query = Expense::query()
-            ->with('category')
+            ->with(['category', 'accountTransaction.account'])
             ->orderByDesc('spent_on')
             ->orderByDesc('id');
 
@@ -115,6 +115,7 @@ class ExpenseController extends Controller
             'note' => $expense->note,
             'expense_category_id' => $expense->expense_category_id,
             'category_name' => $expense->category?->name,
+            'account_name' => $expense->accountTransaction?->account?->name,
         ]);
 
         $categories = ExpenseCategory::query()
