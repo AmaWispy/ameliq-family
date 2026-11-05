@@ -4,10 +4,9 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use App\Models\Task;
+use App\Services\TelegramService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class SendDailyTasks extends Command
 {
@@ -82,18 +81,11 @@ class SendDailyTasks extends Command
         }
 
         $sentCount = 0;
+        $telegram = app(TelegramService::class);
 
         foreach ($recipients as $user) {
-            $response = Http::withoutVerifying()->post("https://api.telegram.org/bot{$token}/sendMessage", [
-                'chat_id' => $user->telegram_chat_id,
-                'text' => $message,
-                'parse_mode' => 'Markdown',
-            ]);
-
-            if ($response->successful()) {
+            if ($telegram->sendMessage((string) $user->telegram_chat_id, $message)) {
                 $sentCount++;
-            } else {
-                Log::error("Ошибка отправки в Telegram для пользователя {$user->id}: " . $response->body());
             }
         }
 

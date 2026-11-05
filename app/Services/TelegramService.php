@@ -21,7 +21,14 @@ class TelegramService
             return false;
         }
 
-        $response = Http::withoutVerifying()->post("https://api.telegram.org/bot{$this->token}/sendMessage", [
+        $request = Http::withoutVerifying();
+        $proxy = config('services.telegram.proxy');
+
+        if (is_string($proxy) && $proxy !== '') {
+            $request = $request->withOptions(['proxy' => $proxy]);
+        }
+
+        $response = $request->post("https://api.telegram.org/bot{$this->token}/sendMessage", [
             'chat_id' => $chatId,
             'text' => $message,
             'parse_mode' => 'Markdown',
