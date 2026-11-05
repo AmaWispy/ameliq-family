@@ -11,34 +11,60 @@ class TelegramService
 
     public function __construct()
     {
-        $this->token = config('services.telegram.bot_token') ?? env('TELEGRAM_BOT_TOKEN');
+        $this->token = (string) (config('services.telegram.bot_token') ?? env('TELEGRAM_BOT_TOKEN') ?? '');
     }
 
-    public function sendMessage(string $chatId, string $message): bool
+    public function sendMessage(string $chatId, string $message, ?string $parseMode = 'Markdown'): bool
     {
-        if (!$this->token) {
-            Log::error('TELEGRAM_BOT_TOKEN is not set.');
-            return false;
+        $payload = [
+            'chat_id' => $chatId,
+            'text' => $message,
+        ];
+
+        if ($parseMode) {
+            $payload['parse_mode'] = $parseMode;
         }
 
-        $request = Http::withoutVerifying();
+        $result = $this->call('sendMessage', $payload);
+
+        return $result['ok'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     * @return array{ok: bool, status: int, body: string}
+     */
+    public function call(string $method, array $params = []): array
+    {
+        if ($this->token === '') {
+            Log::error('TELEGRAM_BOT_TOKEN is not set.');
+
+            return ['ok' => false, 'status' => 0, 'body' => 'TELEGRAM_BOT_TOKEN не задан'];
+        }
+
+        $request = Http::withoutVerifying()->connectTimeout(15)->timeout(20);
         $proxy = config('services.telegram.proxy');
 
         if (is_string($proxy) && $proxy !== '') {
             $request = $request->withOptions(['proxy' => $proxy]);
         }
 
-        $response = $request->post("https://api.telegram.org/bot{$this->token}/sendMessage", [
-            'chat_id' => $chatId,
-            'text' => $message,
-            'parse_mode' => 'Markdown',
-        ]);
+        try {
+            $response = $request->post("https://api.telegram.org/bot{$this->token}/{$method}", $params);
+        } catch (\Throwable $exception) {
+            Log::error('Telegram API error: '.$exception->getMessage());
 
-        if (!$response->successful()) {
-            Log::error("Telegram API error: " . $response->body());
-            return false;
+            return ['ok' => false, 'status' => 0, 'body' => $exception->getMessage()];
         }
 
-        return true;
+        if (! $response->successful()) {
+            Log::error('Telegram API error: '.$response->body());
+        }
+
+        return [
+            'ok' => $response->successful(),
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ];
     }
 }
